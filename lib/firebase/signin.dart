@@ -146,6 +146,7 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(
                       height: 16,
                     ),
+
                     Container(
                       margin:EdgeInsets.only(top: MediaQuery.of(context).size.height*0.12),
                       decoration: BoxDecoration(
