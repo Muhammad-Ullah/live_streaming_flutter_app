@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "757974891458",
+    "project_id": "livestreamingapp-3dcc6",
+    "storage_bucket": "livestreamingapp-3dcc6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757974891458:android:5f8b3fca3232819c57745b",
+        "android_client_info": {
+          "package_name": "com.example.live_streaming_flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757974891458-su4tlri0j4j4egjtcvcqsbk1utv25ktr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYHezomPgI6-cFnpVpW0Qkw2Pwu4lAtAk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757974891458-su4tlri0j4j4egjtcvcqsbk1utv25ktr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
