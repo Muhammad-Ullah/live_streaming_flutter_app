@@ -1,7 +1,7 @@
 import 'package:live_streaming_flutter_app/firebase/database/database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class AuthService2 {
+class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<int> registerUser({email, name, pass, username, image}) async {

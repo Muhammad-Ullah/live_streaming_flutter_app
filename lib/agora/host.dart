@@ -6,6 +6,7 @@ import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:agora_rtc_engine/rtc_local_view.dart' as rtc_local_view;
 import 'package:agora_rtc_engine/rtc_remote_view.dart' as rtc_remote_view;
 import 'package:hexcolor/hexcolor.dart';
+import 'package:live_streaming_flutter_app/agora/utils/settings.dart';
 import 'package:live_streaming_flutter_app/frontEnd/homescreen/homeScreen.dart';
 import 'package:live_streaming_flutter_app/helper/ourTheme.dart';
 
@@ -13,9 +14,8 @@ import 'package:live_streaming_flutter_app/helper/ourTheme.dart';
 
 class Host extends StatefulWidget {
   final String uid;
-  final bool isBroadcaster;
   final String channelName;
-  const Host({Key? key,required this.uid,required this.isBroadcaster,required this.channelName}) : super(key: key);
+  const Host({Key? key,required this.uid,required this.channelName}) : super(key: key);
 
   @override
   _HostState createState() => _HostState();
@@ -56,7 +56,7 @@ class _HostState extends State<Host> {
   }
   void getData()async
   {
-
+    var date = DateTime.now().microsecondsSinceEpoch;
     result= await FirebaseFirestore.instance.collection('user_email').doc(widget.uid).get();
     if(result.data()['name']!='')
     {
@@ -69,14 +69,14 @@ class _HostState extends State<Host> {
           'end': 0,
           'image': img,
           'channelname': widget.channelName,
-          'msgadded': 0,
+          'time':date,
         });
         try{
           await FirebaseFirestore.instance.collection('channels').doc(widget.channelName).collection("Messages").add(
               {
                 'image':'https://www.kindpng.com/picc/m/252-2524695_dummy-profile-image-jpg-hd-png-download.png',
                 'name':widget.channelName,
-                'message':"Type your message here",
+                'message':"Live comments",
               });
           setState(() {
             firstmsgadded=true;
@@ -89,7 +89,7 @@ class _HostState extends State<Host> {
         }
       }catch(e)
       {
-        print("muhammad khan");
+        print("Error khan");
         print(e.toString());
       }
 
@@ -100,7 +100,7 @@ class _HostState extends State<Host> {
   Future<void> initializeAgora() async {
     await _initAgoraRtcEngine();
 
-    if (widget.isBroadcaster) streamId = (await _engine.createDataStream(false, false))!;
+     streamId = (await _engine.createDataStream(false, false))!;
 
     _engine.setEventHandler(RtcEngineEventHandler(
       joinChannelSuccess: (channel, uid, elapsed) {
@@ -115,8 +115,6 @@ class _HostState extends State<Host> {
       },
       userJoined: (uid, elapsed) {
         setState(() {
-
-
           _users.add(uid);
         });
       },
@@ -130,24 +128,19 @@ class _HostState extends State<Host> {
       },
       streamMessageError: (_, __, error, ___, ____) {
         final String info = "here is the error $error";
-        print(info);
       },
     ));
-
+    print("Ikram ${widget.channelName}");
     await _engine.joinChannel(null, widget.channelName, null, 0);
   }
 
 
   Future<void> _initAgoraRtcEngine() async {
-    _engine = await RtcEngine.createWithConfig(RtcEngineConfig('d5d048ebcb88420bb9f7dcb5b79a085d'));
+    _engine = await RtcEngine.createWithConfig(RtcEngineConfig(APP_ID));
     await _engine.enableVideo();
 
     await _engine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    if (widget.isBroadcaster) {
       await _engine.setClientRole(ClientRole.Broadcaster);
-    } else {
-      await _engine.setClientRole(ClientRole.Audience);
-    }
   }
 
 
@@ -247,9 +240,9 @@ class _HostState extends State<Host> {
           ],
         ),
         Container(
-          margin: EdgeInsets.only(top: h*0.4),
+          margin: EdgeInsets.only(top: h*0.5),
           width: w*0.98,
-          height: h*0.4,
+          height: h*0.3,
           child:  (firstmsgadded==true)?StreamBuilder(
               stream: FirebaseFirestore.instance.collection('channels').doc(widget.channelName).collection('Messages').snapshots(),
               builder: (BuildContext context, AsyncSnapshot<cf.QuerySnapshot> snapshot) {
@@ -314,36 +307,38 @@ class _HostState extends State<Host> {
 
       child: Row(
         children: [
-          Expanded(
-              child: TextField(
-                  cursorColor: OurTheme().mPurple,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: _sendMessage,
-                  style: const TextStyle(color: Colors.white),
-                  controller: _channelMessageController,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    suffixIcon: IconButton(
-                      onPressed: ()
-                      {
-                        _sendMessage(_channelMessageController.text);
-                      },
-                      icon: const Icon(Icons.send_rounded,color:Colors.redAccent,),
-                    ),
-                    isDense: true,
-                    hintText: 'Comment',
-                    hintStyle: const TextStyle(color: Colors.redAccent),
-                    enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50.0),
-                        borderSide: BorderSide(color: OurTheme().mPurple)),
-                    focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50.0),
-                        borderSide: const BorderSide(color: Colors.white)),
-                  ))),
+          SizedBox(
+            width: w*0.7,
+            child: TextField(
+                cursorColor: OurTheme().mPurple,
+                textInputAction: TextInputAction.send,
+                onSubmitted: _sendMessage,
+                style: const TextStyle(color: Colors.white),
+                controller: _channelMessageController,
+                textCapitalization: TextCapitalization.sentences,
+                decoration: InputDecoration(
+                  suffixIcon: IconButton(
+                    onPressed: ()
+                    {
+                      _sendMessage(_channelMessageController.text);
+                    },
+                    icon: const Icon(Icons.send_rounded,color:Colors.redAccent,),
+                  ),
+                  isDense: true,
+                  hintText: 'Comment',
+                  hintStyle: const TextStyle(color: Colors.redAccent),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: BorderSide(color: OurTheme().mPurple)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(50.0),
+                      borderSide: const BorderSide(color: Colors.white)),
+                )),
+          ),
 
           Container(
             margin: const EdgeInsets.only(bottom: 6,left: 10),
-            width: w*0.12,
+            width: w*0.1,
             child: RawMaterialButton(
               onPressed: _onToggleMute,
               child: Icon(
@@ -396,7 +391,7 @@ class _HostState extends State<Host> {
       }
     }
     try {
-      await FirebaseFirestore.instance.collection('channels').doc(result.data()['name']).collection("Messages").add(
+      await FirebaseFirestore.instance.collection('channels').doc(widget.channelName).collection("Messages").add(
           {
             'image':img,
             'name':widget.channelName,
@@ -409,7 +404,6 @@ class _HostState extends State<Host> {
 
     } catch (errorCode) {
       print('Send channel message error: ' + errorCode.toString());
-      //log1('Send channel message error: ' + errorCode.toString());
     }
   }
 
@@ -465,7 +459,6 @@ class _HostState extends State<Host> {
   }
 
   void _onCallEnd(BuildContext context) {
-    Navigator.of(context).pop();
     if (mounted){
       setState(() {
         ending = true;
@@ -478,16 +471,22 @@ class _HostState extends State<Host> {
       });
 
       Timer(
-        const Duration(seconds: 6),
+        const Duration(seconds: 5),
             () => FirebaseFirestore.instance.collection("channels").doc(widget.channelName).delete(),
       );
+      FirebaseFirestore.instance.collection("channels").doc(widget.channelName).collection('Messages').get().then((snapshot) {
+        for (DocumentSnapshot ds in snapshot.docs){
+          ds.reference.delete();
+        }});
       Timer(
-          const Duration(seconds: 6),
+          const Duration(seconds: 5),
               () =>   Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
-              ));
-
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          ));
+      setState(() {
+        ending = false;
+      });
     }
     catch(e)
     {
@@ -513,13 +512,12 @@ class _HostState extends State<Host> {
         .collection('channels')
         .doc(widget.channelName)
         .get();
-    if(res.data()!['viewers']!=null)
+    if(res.data()!=null)
     {
-      if (mounted) {
         setState(() {
           view = res.data()!['viewers'];
         });
-      }
+
     }
 
   }

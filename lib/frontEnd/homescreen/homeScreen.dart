@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:live_streaming_flutter_app/agora/host.dart';
 import 'package:live_streaming_flutter_app/agora/join.dart';
 import 'package:live_streaming_flutter_app/frontEnd/homescreen/live.dart';
@@ -26,8 +27,9 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Live> list2 = [];
   late Live liveUser;
   var username;
+  bool cardLoader=true;
   user_email pass=user_email(username: '', image: '', email: '', name: '');
-  String uid=FirebaseAuth.instance.currentUser!.uid;
+
 
   @override
   void initState() {
@@ -84,9 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   Future<void> currentUserProfile()
   async {
-    print("Current userprofile: $uid");
     try
     {
+      String uid=FirebaseAuth.instance.currentUser!.uid;
       FirebaseFirestore.instance.collection('user_email').doc(uid).get().then((value) {
         pass.name=value.data()!['name'];
         pass.email=value.data()!['email'];
@@ -103,17 +105,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
   void dbChangeListen2() {
     databaseReference
-        .collection('liveuser')
+        .collection('channels')
         .snapshots()
         .listen((result) {
-
       for (var result in result.docs) {
         setState(() {
           list2.add(Live(
-              username: result.data()['name'],
+              username: result.data()['channelname'],
               image: result.data()['image'],
-              channelId: result.data()['channel'],
-              me: false));
+              me: false ));
         });
       }
     });
@@ -121,19 +121,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void dbChangeListen() {
     databaseReference
-        .collection('liveuser')
+        .collection('channels')
         .orderBy("time", descending: true)
         .snapshots().where((event) => "name"!=pass.name ?false:true)
         .listen((result) {
       for (var result in result.docs) {
         setState(() {
           list.add( Live(
-              username: result.data()['name'],
+              username: result.data()['channelname'],
               image: result.data()['image'],
-              channelId: result.data()['channel'],
               me: false));
         });
       }
+    });
+    setState(() {
+      cardLoader=!cardLoader;
     });
   }
   Future<bool> _onWillPop() async {
@@ -169,12 +171,25 @@ class _HomeScreenState extends State<HomeScreen> {
               appBar: AppBar(
                 elevation: 0.5,
                 backgroundColor: Colors.white,
-                title: Text(
-                  "LIVE",
-                  style: TextStyle(
+                title: Row(
+                  children: [
+                    Text(
+                      "LIVE",
+                      style: TextStyle(
+                          color: OurTheme().mPurple,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 25),
+                    ),
+                    (cardLoader==false)?IconButton(onPressed: (){
+                      setState(() {
+                        cardLoader=!cardLoader;
+                      });
+                      dbChangeListen();
+                    }, icon: Icon(Icons.refresh_outlined,color: OurTheme().mPurple,)):SpinKitFadingCircle(
                       color: OurTheme().mPurple,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 25),
+                      size: 30.0,
+                    ),
+                  ],
                 ),
                 centerTitle: true,
                 actions: [
@@ -314,16 +329,12 @@ class _HomeScreenState extends State<HomeScreen> {
           GestureDetector(
             onTap: () {
               // Join function
-              onJoin(
-                  channelName: users.username,
-                  channelId: users.channelId,
-                  username: users.username,
-                  hostImage: users.image,
-                  userImage: _profileImageUrl);
+              onJoin(users.username, pass.username,
+                  users.image,
+                  _profileImageUrl);
             },
             child: Column(
               children: [
-                //if (users.username!=_myName)
                   LiveUserCard(
                     broadName: users.username,
                     broadImage: users.image,
@@ -336,30 +347,25 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Future<void> onJoin(
-      {channelName, channelId, username, hostImage, userImage}) async {
+  Future<void> onJoin(channelName, username, hostImage, userImage) async {
+    String uid=FirebaseAuth.instance.currentUser!.uid;
     // update input validation
     if (channelName.isNotEmpty) {
-      // push video page with given channel name
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => Join(userId: uid, channelName: channelName, myImage: userImage, myName: username)),
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context)=>Join(userId: uid, channelName: channelName, myImage: userImage, myName: username)),
       );
 
     }
   }
 
-
   Future<void> onCreate({username, image}) async {
+    String uid=FirebaseAuth.instance.currentUser!.uid;
     // await for camera and mic permissions before pushing video page
     await _handleCameraAndMic();
     var currentTime = '$DateFormat("dd-MM-yyyy hh:mm:ss").format(date)';
     // push video page with given channel name
-
-    await Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>  Host(uid: uid, isBroadcaster: true, channelName: username,))
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context)=>Host(uid: uid, channelName: username,)),
     );
   }
 

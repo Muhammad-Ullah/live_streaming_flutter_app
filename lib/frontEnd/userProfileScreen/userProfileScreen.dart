@@ -1,4 +1,5 @@
 import 'package:live_streaming_flutter_app/firebase/authorization/authService.dart';
+import 'package:live_streaming_flutter_app/frontEnd/homescreen/homeScreen.dart';
 import 'package:live_streaming_flutter_app/helper/users.dart';
 import 'package:live_streaming_flutter_app/helper/ourTheme.dart';
 import 'package:flutter/material.dart';
@@ -147,7 +148,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
                 InkWell(
                   onTap: () async {
-                    await AuthService2().signOut();
+                    try {
+
+                      await AuthService().signOut();
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()));
+                    }catch(e)
+                    {
+                      print(e.toString());
+                    }
                   },
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 20),

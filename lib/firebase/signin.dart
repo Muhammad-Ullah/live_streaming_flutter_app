@@ -21,7 +21,7 @@ class _SignInState extends State<SignIn> {
   TextEditingController emailEditingController =  TextEditingController();
   TextEditingController passwordEditingController = TextEditingController();
 
-  final AuthService2 _auth = AuthService2();
+  final AuthService _auth = AuthService();
 
   final formKey = GlobalKey<FormState>();
 
@@ -35,7 +35,7 @@ class _SignInState extends State<SignIn> {
       });
       try
       {
-      UserCredential user = await FirebaseAuth.instance.signInWithEmailAndPassword
+      await FirebaseAuth.instance.signInWithEmailAndPassword
         (email:emailEditingController.text,password:passwordEditingController.text);
       Navigator.push(
         context,
@@ -146,7 +146,6 @@ class _SignInState extends State<SignIn> {
                     const SizedBox(
                       height: 16,
                     ),
-
                     Container(
                       margin:EdgeInsets.only(top: MediaQuery.of(context).size.height*0.12),
                       decoration: BoxDecoration(

@@ -87,15 +87,6 @@ class DatabaseService {
       try
       {
         await FirebaseFirestore.instance
-            .collection(userCollection)
-            .doc(username)
-            .set({
-          'name': name,
-          'email': email,
-          'username': username,
-          'image': fileURL,
-        });
-        await FirebaseFirestore.instance
             .collection(emailCollection)
             .doc(uid)
             .set({

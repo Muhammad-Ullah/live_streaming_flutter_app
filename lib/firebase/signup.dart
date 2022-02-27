@@ -41,26 +41,31 @@ class _SignUpState extends State<SignUp> {
       final email = emailEditingController.text.toString().trim();
       final name = _nameController.text.toString().trim();
       final username = usernameEditingController.text.toString().trim();
-       await _auth.registerUser(
-          email: email,
-          name: name,
-          username: username,
-          pass: pass,
-          image: _image);
-      final User? user = FirebaseAuth.instance.currentUser;
-      final uid = user!.uid;
-      setState(() {
-        isLoading = false;
-      });
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
+       try{
+         await _auth.registerUser(
+             email: email,
+             name: name,
+             username: username,
+             pass: pass,
+             image: _image);
+         setState(() {
+           isLoading = false;
+         });
+         Navigator.push(
+           context,
+           MaterialPageRoute(builder: (context) => const HomeScreen()),
+         );
+       }catch(e)
+    {
+      print("Error");
+      print(e.toString());
+    }
+
     }
   }
 
 
-  final AuthService2 _auth = AuthService2();
+  final AuthService _auth = AuthService();
   final formKey = GlobalKey<FormState>();
   bool isLoading = false;
 

@@ -5,6 +5,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:live_streaming_flutter_app/frontEnd/homescreen/homeScreen.dart';
+import 'package:live_streaming_flutter_app/frontEnd/homescreen/homeScreen.dart';
+
+import 'frontEnd/homescreen/homeScreen.dart';
 
 
 void main() async {
@@ -34,18 +37,19 @@ bool getUid=false;
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
+    profile();
   }
 
   Future<void> profile() async
   {
     User? firebaseUser = FirebaseAuth.instance.currentUser;
-    uid=firebaseUser!.uid;
-    print(uid);
-    setState(() {
-      getUid=true;
-    });
+    (firebaseUser!=null)?uid=firebaseUser.uid:uid='';
+
     if(uid.isNotEmpty)
       {
+        setState(() {
+          getUid=true;
+        });
         try
         {
           FirebaseFirestore.instance.collection('user_email').doc(uid).get().then((value) {
@@ -66,13 +70,12 @@ bool getUid=false;
 
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
-    profile();
     switch (state) {
       case AppLifecycleState.inactive:
         print('inactive');
         break;
       case AppLifecycleState.paused:
-        await FirebaseFirestore.instance.collection("liveuser").doc(username).delete().then((value) =>
+        await FirebaseFirestore.instance.collection("channelname").doc(username).delete().then((value) =>
             print("Success"));
         break;
       case AppLifecycleState.resumed:
@@ -80,7 +83,6 @@ bool getUid=false;
         break;
       case AppLifecycleState.detached:
         print('detached');
-
         break;
       default:
     }
@@ -91,10 +93,7 @@ bool getUid=false;
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         // home: BroadCasterProfile(),
-        home:
-        (uid=='')?(getUid==false)? const SignUp():const HomeScreen():const Center(
-          child: CircularProgressIndicator(),
-        )
+        home: (getUid==false)? const SignUp():const HomeScreen()
     );
   }
 }
